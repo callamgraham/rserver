@@ -9,9 +9,15 @@ services:
       - TZ=Etc/UTC
       - JELLYFIN_PublishedServerUrl=192.168.0.5 #optional
     volumes:
-      - /path/to/library:/config
-      - /path/to/tvseries:/data/tvshows
-      - /path/to/movies:/data/movies
+      - /home/callam/jellyfin/config:/config
+      - /home/callam/jellyfin/cache:/cache
+      - /media/hd/TV_Shows:/media/TV_Shows
+      - /media/hd/Audiobooks:/media/Audiobooks
+      - /media/hd/Lectures:/media/Lectures
+      - /media/hd/Movies:/media/Movies
+      - /media/hd/Home_Videos:/media/Home_Videos
+      - /media/hd/Pictures:/media/Pictures
+	    
     ports:
       - 8096:8096
       - 8920:8920 #optional
