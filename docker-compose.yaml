@@ -11,12 +11,12 @@ services:
     volumes:
       - /media/server_data/jellyfin/config:/config
       - /media/server_data/jellyfin/cache:/cache
-      - /media/hd/TV_Shows:/media/TV_Shows
-      # - /media/hd/Audiobooks:/media/Audiobooks # moving this to audiobookshelf
-      - /media/hd/Lectures:/media/Lectures
-      - /media/hd/Movies:/media/Movies
-      - /media/hd/Home_Videos:/media/Home_Videos
-      - /media/hd/Pictures:/media/Pictures
+      - /media/TV_Shows:/media/TV_Shows
+      # - /media/Audiobooks:/media/Audiobooks # moving this to audiobookshelf
+      - /media/Lectures:/media/Lectures
+      - /media/Movies:/media/Movies
+      - /media/Home_Videos:/media/Home_Videos
+      - /media/Pictures:/media/Pictures
 
     ports:
       - 8096:8096
