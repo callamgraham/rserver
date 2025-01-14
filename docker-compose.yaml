@@ -135,4 +135,4 @@ services:
 
 secrets:
   piholepsswrd:
-    file: ./piholepsswrd
+    file: /home/callam/piholepsswrd
