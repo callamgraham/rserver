@@ -9,10 +9,10 @@ services:
       - TZ=Etc/UTC
       - JELLYFIN_PublishedServerUrl=192.168.0.5 #optional
     volumes:
-      - /home/callam/jellyfin/config:/config
-      - /home/callam/jellyfin/cache:/cache
+      - /media/server_data/jellyfin/config:/config
+      - /media/server_data/jellyfin/cache:/cache
       - /media/hd/TV_Shows:/media/TV_Shows
-      - /media/hd/Audiobooks:/media/Audiobooks
+      # - /media/hd/Audiobooks:/media/Audiobooks # moving this to audiobookshelf
       - /media/hd/Lectures:/media/Lectures
       - /media/hd/Movies:/media/Movies
       - /media/hd/Home_Videos:/media/Home_Videos
@@ -44,9 +44,94 @@ services:
       - './etc-pihole:/etc/pihole'
       - './etc-dnsmasq.d:/etc/dnsmasq.d'
     #   https://github.com/pi-hole/docker-pi-hole#note-on-capabilities
-    cap_add:
-      - NET_ADMIN # Required if you are using Pi-hole as your DHCP server, else not needed
+    # cap_add:
+      # - NET_ADMIN # Required if you are using Pi-hole as your DHCP server, else not needed
     restart: unless-stopped
+
+  forgejo:
+    image: codeberg.org/forgejo/forgejo:latest
+    container_name: forgejo
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+    restart: unless-stopped
+    networks:
+      - forgejo
+    volumes:
+      - /media/server_data/forgejo:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - '3000:3000'
+      - '222:22'
+
+  mealie:
+    image: ghcr.io/mealie-recipes/mealie:latest # 
+    container_name: mealie
+    restart: unless-stopped
+    ports:
+        - "9925:9000" # 
+    deploy:
+      resources:
+        limits:
+          memory: 1000M # 
+    volumes:
+      - /media/server_data/mealie:/app/data/
+    environment:
+      # Set Backend ENV Variables Here
+      ALLOW_SIGNUP: "false"
+      PUID: 1000
+      PGID: 1000
+      TZ: America/Toronto
+      BASE_URL: https://mealie.basement
+
+  vaultwarden:
+    image: vaultwarden/server:latest
+    container_name: vaultwarden
+    restart: unless-stopped
+    environment:
+      DOMAIN: "https://vw.basement"
+    volumes:
+      - /media/server_data/vaultwarden:/data/
+    ports:
+      - 44000:80
+      
+  audiobookshelf:
+    image: ghcr.io/advplyr/audiobookshelf:latest
+    # ABS runs on port 13378 by default. If you want to change
+    # the port, only change the external port, not the internal port
+    ports:
+      - 13378:80
+    volumes:
+      # These volumes are needed to keep your library persistent
+      # and allow media to be accessed by the ABS server.
+      # The path to the left of the colon is the path on your computer,
+      # and the path to the right of the colon is where the data is
+      # available to ABS in Docker.
+      # You can change these media directories or add as many as you want
+      - /media/Audiobooks:/audiobooks
+      - /media/Podcasts:/podcasts
+      # The metadata directory can be stored anywhere on your computer
+      - /media/server_data/audiobookshelf/metadata:/metadata
+      # The config directory needs to be on the same physical machine
+      # you are running ABS on
+      - /media/server_data/audiobookshelf/config:/config
+    restart: unless-stopped
+    # You can use the following user directive to run the ABS
+    # docker container as a specific user. You will need to change
+    # the UID and GID to the correct values for your user.
+    # user: 1000:1000
+    
+  homeassistant:
+    container_name: homeassistant
+    image: "ghcr.io/home-assistant/home-assistant:stable"
+    volumes:
+      - /media/server_data/homeassistant:/config
+      - /etc/localtime:/etc/localtime:ro
+      - /run/dbus:/run/dbus:ro
+    restart: unless-stopped
+    privileged: true
+    network_mode: host    
 
 secrets:
   piholepsswrd:
